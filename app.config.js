@@ -1,4 +1,6 @@
-{
+import 'dotenv/config';
+
+export default{
   "expo": {
     "name": "CheckinApp",
     "slug": "CheckinApp",
@@ -26,10 +28,13 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra": {
-      "eas": {
-        "projectId": "0478ea29-cdce-4951-8055-079b97d8c9e8"
-      }
+    extra: {
+      apiKey: process.env.API_KEY,
+      authDomain: process.env.AUTH_DOMAIN,
+      projectId: process.env.PROJECT_ID,
+      storageBucket: process.env.STORAGE_BUCKET,
+      messagingSenderId: process.env.MESSAGING_SENDER_ID,
+      appId: process.env.APP_ID
     }
   }
 }

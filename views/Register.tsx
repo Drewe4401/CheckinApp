@@ -7,12 +7,20 @@ import {
   Text,
   KeyboardAvoidingView,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { SelectList } from 'react-native-dropdown-select-list';
-import { auth } from '../firebase';
+import { auth, database } from "../config/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import CryptoJS from "crypto-js";
+import { firebase } from '../config/firebase';
 
-const Register = () => {
-  const [Fname, setFname] = useState('');
+interface HomeProps {
+  navigation: any;
+}
+
+const Register = (props: HomeProps) => {
+  const [Email, setEmail] = useState('');
   const [FnameConfirm, setFnameConfirm] = useState('');
   const [Companyname, setCompanyname] = useState('');
   const [CompanyID, setCompanyID] = useState('');
@@ -28,14 +36,61 @@ const Register = () => {
 ]
 
   const handleRegister = () => {
+
+  const todoRef = firebase.firestore().collection('users');
+
     // Perform registration logic (e.g., call an API or validate user input)
     if (password !== confirmPassword) {
       console.log('Passwords do not match');
       return;
     }
-    if (Fname !== FnameConfirm) {
-      console.log('Full Name did not match');
-      return;
+    if(selected == 'Owner'){
+    createUserWithEmailAndPassword(auth, Email, password)
+        .then((credentials) => {
+          const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+          const uniqueCompanyid = CryptoJS.SHA256(Email).toString(CryptoJS.enc.Hex);
+          const todoRef = firebase.firestore().collection(uniqueCompanyid).doc('Owner');
+          const Owner_data = {
+            User_ID: credentials.user.uid,
+            CreatedAt: timestamp,
+            Company_Title: selected,
+            Full_Name: FnameConfirm,
+            Email_address: Email,
+            Company_Name: Companyname,
+            Company_ID: uniqueCompanyid
+          };
+          todoRef
+            .set(Owner_data).then(() => {console.log("Signup Owner Success");props.navigation.navigate("Home");})
+            .catch((err) => Alert.alert("Register Error", err.message))
+
+          })
+        .catch((err) => Alert.alert("Register Error", err.message));
+    } else if(selected == 'Employee'){
+      
+      createUserWithEmailAndPassword(auth, Email, password)
+      .then((credentials) => {
+        const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+        const todoRef = firebase.firestore().collection(CompanyID).doc(Email);
+        firebase.firestore().collection(CompanyID).doc('Owner')
+        .get()
+        .then((doc) => {
+          const temp = doc.data().Company_Name;
+          const Employee_data = {
+            User_ID: credentials.user.uid,
+            CreatedAt: timestamp,
+            Company_Title: selected,
+            Full_Name: FnameConfirm,
+            Email_address: Email,
+            Company_Name: temp,
+            Company_ID: CompanyID
+          };
+          todoRef
+          .set(Employee_data).then(() => {console.log("Signup Employee Success");props.navigation.navigate("Home");})
+          .catch((err) => Alert.alert("Register Error", err.message))
+        })
+        .catch((err) => Alert.alert("Register Error", err.message));
+        })
+      .catch((err) => Alert.alert("Register Error", err.message));
     }
   };
 
@@ -82,16 +137,16 @@ const Register = () => {
       )}
         <TextInput
           style={styles.input}
-          onChangeText={setFname}
-          value={Fname}
-          placeholder="Enter Full Name"
+          onChangeText={setEmail}
+          value={Email}
+          placeholder="Enter Email Address"
           autoCapitalize="none"
         />
          <TextInput
           style={styles.input}
           onChangeText={setFnameConfirm}
           value={FnameConfirm}
-          placeholder="Confirm Full Name"
+          placeholder="Enter Full Name"
           autoCapitalize="none"
         />
         <TextInput

@@ -9,20 +9,29 @@ import {
   Text,
   Image,
   KeyboardAvoidingView,
+  Alert,
 } from 'react-native';
+import { auth } from "../config/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 interface LoginScreenProps {
   navigation: any;
 }
 
 const Login = (props: LoginScreenProps) => {
-  const [Fname, setFname] = useState('');
+  const [Email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
     // Perform login logic (e.g., call an API or validate user credentials)
-    console.log('Full Name:', Fname);
-    console.log('Password:', password);
+
+
+    signInWithEmailAndPassword(auth, Email, password)
+        .then(async (credentials) => {const token = await credentials.user.getIdToken();console.log("SignIn was a Success"); AsyncStorage.setItem('authToken', token);console.log(token);props.navigation.navigate("Home");})
+        .catch((err) => Alert.alert("Login error", err.message));
   };
 
 
@@ -36,15 +45,16 @@ const Login = (props: LoginScreenProps) => {
         <Image
          style={{
           resizeMode: 'contain',
+          alignSelf:'center',
           height: 200,
           width: 400,
         }}
         source={require('../assets/check-in-high-resolution-logo-color-on-transparent-background.png')}/>
         <TextInput
           style={styles.input}
-          onChangeText={setFname}
-          value={Fname}
-          placeholder="Enter Full Name"
+          onChangeText={setEmail}
+          value={Email}
+          placeholder="Enter Email Address"
           autoCapitalize="none"
         />
         <TextInput
@@ -57,10 +67,9 @@ const Login = (props: LoginScreenProps) => {
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
-        <Button
-        title="Don't have an account? Click here to Register."
-        onPress={registera}
-      />
+        <TouchableOpacity style={styles.registerlo} onPress={registera}>
+          <Text style={styles.registertext}>Don't have an account? Click here to Register.</Text>
+      </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
@@ -87,6 +96,15 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
     paddingHorizontal: 20,
     borderRadius: 5,
+    alignItems: 'center',
+  },
+  registerlo: {
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  registertext: {
+    fontSize: 18,
+    color: '#2196F3',
     alignItems: 'center',
   },
   buttonText: {
