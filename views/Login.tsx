@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -33,6 +33,16 @@ const Login = (props: LoginScreenProps) => {
         .then(async (credentials) => {const token = await credentials.user.getIdToken();console.log("SignIn was a Success"); AsyncStorage.setItem('authToken', token);console.log(token);props.navigation.navigate("Home");})
         .catch((err) => Alert.alert("Login error", err.message));
   };
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const token = await AsyncStorage.getItem('authToken');
+      if (token) {
+        props.navigation.navigate('Home');
+      }
+    };
+    checkLoginStatus();
+  }, []);
 
 
 

@@ -27,7 +27,7 @@ const Home = (props: LoginScreenProps) => {
     }
   
   return (
-    <View>
+    <View style={styles.container}>
         <TouchableOpacity style={styles.button} onPress={handleLogOut}>
           <Text style={styles.buttonText}>Log Out</Text>
         </TouchableOpacity>
@@ -40,6 +40,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 150,
     backgroundColor: '#F5FCFF',
+    justifyContent:'center',
   },
   inputContainer: {
     paddingHorizontal: 20,
@@ -57,6 +58,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 5,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonText: {
     color: '#FFFFFF',
