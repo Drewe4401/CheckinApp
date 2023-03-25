@@ -14,6 +14,7 @@ import { auth, database } from "../config/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import CryptoJS from "crypto-js";
 import { firebase } from '../config/firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface HomeProps {
   navigation: any;
@@ -31,7 +32,6 @@ const Register = (props: HomeProps) => {
   const [showInputCO, setShowInputCO] = useState(false);
 
   const data = [
-    {key:'1', value:'Employee'},
     {key:'2', value:'Owner'},
 ]
 
@@ -46,21 +46,21 @@ const Register = (props: HomeProps) => {
     }
     if(selected == 'Owner'){
     createUserWithEmailAndPassword(auth, Email, password)
-        .then((credentials) => {
+        .then(async (credentials) => {
           const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+          const token = await credentials.user.getIdToken();
           const uniqueCompanyid = CryptoJS.SHA256(Email).toString(CryptoJS.enc.Hex);
-          const todoRef = firebase.firestore().collection(uniqueCompanyid).doc('Owner');
+          const todoRef = firebase.firestore().collection('Users').doc(Email.toLowerCase());
           const Owner_data = {
             User_ID: credentials.user.uid,
             CreatedAt: timestamp,
             Company_Title: selected,
             Full_Name: FnameConfirm,
-            Email_address: Email,
+            Email_address: Email.toLowerCase(),
             Company_Name: Companyname,
-            Company_ID: uniqueCompanyid
           };
           todoRef
-            .set(Owner_data).then(() => {console.log("Signup Owner Success");props.navigation.navigate("Home");})
+            .set(Owner_data).then(() => {console.log("Signup Owner Success");AsyncStorage.setItem('authToken', token);props.navigation.navigate("Homenavigator", {screen: 'Home'});})
             .catch((err) => Alert.alert("Register Error", err.message))
 
           })
@@ -68,8 +68,9 @@ const Register = (props: HomeProps) => {
     } else if(selected == 'Employee'){
       
       createUserWithEmailAndPassword(auth, Email, password)
-      .then((credentials) => {
+      .then(async (credentials) => {
         const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+        const token = await credentials.user.getIdToken();
         const todoRef = firebase.firestore().collection(CompanyID).doc(Email);
         firebase.firestore().collection(CompanyID).doc('Owner')
         .get()
@@ -85,7 +86,7 @@ const Register = (props: HomeProps) => {
             Company_ID: CompanyID
           };
           todoRef
-          .set(Employee_data).then(() => {console.log("Signup Employee Success");props.navigation.navigate("Home");})
+          .set(Employee_data).then(() => {console.log("Signup Employee Success");AsyncStorage.setItem('authToken', token);props.navigation.navigate("Homenavigator", {screen: 'Home'});})
           .catch((err) => Alert.alert("Register Error", err.message))
         })
         .catch((err) => Alert.alert("Register Error", err.message));

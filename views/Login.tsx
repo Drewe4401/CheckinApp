@@ -30,7 +30,7 @@ const Login = (props: LoginScreenProps) => {
 
 
     signInWithEmailAndPassword(auth, Email, password)
-        .then(async (credentials) => {const token = await credentials.user.getIdToken();console.log("SignIn was a Success"); AsyncStorage.setItem('authToken', token);console.log(token);props.navigation.navigate("Home");})
+        .then(async (credentials) => {const token = await credentials.user.getIdToken();console.log("SignIn was a Success"); AsyncStorage.setItem('authToken', token);console.log(token);props.navigation.navigate("Homenavigator", {screen: 'Home'});})
         .catch((err) => Alert.alert("Login error", err.message));
   };
 
@@ -38,7 +38,7 @@ const Login = (props: LoginScreenProps) => {
     const checkLoginStatus = async () => {
       const token = await AsyncStorage.getItem('authToken');
       if (token) {
-        props.navigation.navigate('Home');
+        props.navigation.navigate("Homenavigator", {screen: 'Home'});
       }
     };
     checkLoginStatus();
